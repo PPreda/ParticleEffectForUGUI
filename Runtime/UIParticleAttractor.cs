@@ -168,7 +168,7 @@ namespace Coffee.UIExtensions
                 {
                     // Attracted
                     var p = particles[i];
-                    if (0f < p.remainingLifetime && Vector3.Distance(p.position, dstPos) < m_DestinationRadius)
+                    if ((0f < p.remainingLifetime && Vector3.Distance(p.position, dstPos) < m_DestinationRadius) || p.remainingLifetime <= Time.smoothDeltaTime)
                     {
                         p.remainingLifetime = 0f;
                         particles[i] = p;
