@@ -143,6 +143,8 @@ namespace Coffee.UIExtensions
             m_ParticleSystems = null;
         }
 
+        private int lastParticlesCount;
+        private int lastParticlesKilled;
         internal void Attract()
         {
             // Collect UIParticle if needed (same size as m_ParticleSystems)
@@ -157,6 +159,15 @@ namespace Coffee.UIExtensions
 
                 // Skip: No active particles
                 var count = particleSystem.particleCount;
+                if(count < lastParticlesCount - lastParticlesKilled)
+                {
+                    for(int i = 0; i < (lastParticlesCount - lastParticlesKilled) - count; i++)
+                    {
+                        m_OnAttracted?.Invoke();
+                    }
+                }
+                lastParticlesCount = count;
+                lastParticlesKilled = 0;
                 if (count == 0) continue;
 
                 var particles = ParticleSystemExtensions.GetParticleArray(count);
@@ -168,8 +179,9 @@ namespace Coffee.UIExtensions
                 {
                     // Attracted
                     var p = particles[i];
-                    if ((0f < p.remainingLifetime && Vector3.Distance(p.position, dstPos) < m_DestinationRadius) || p.remainingLifetime <= Time.smoothDeltaTime)
+                    if ((0f < p.remainingLifetime && Vector3.Distance(p.position, dstPos) < m_DestinationRadius) || p.remainingLifetime <= Time.unscaledDeltaTime * 1.1f)
                     {
+                        lastParticlesKilled++;
                         p.remainingLifetime = 0f;
                         particles[i] = p;
 
@@ -201,7 +213,6 @@ namespace Coffee.UIExtensions
                     p.velocity *= 0.5f;
                     particles[i] = p;
                 }
-
                 particleSystem.SetParticles(particles, count);
             }
         }
